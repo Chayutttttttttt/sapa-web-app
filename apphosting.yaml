@@ -21,7 +21,7 @@ environmentVariables:
     secret: "sapa-nr.firebasestorage.app"
   - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
     secret : "579859985153"
-  - varibale: VITE_FIREBASE_APP_ID
+  - variable : VITE_FIREBASE_APP_ID
     secret : "1:579859985153:web:c5503f00d5fa08bead6100"
 
 # Environment variables and secrets.
