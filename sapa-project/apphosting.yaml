@@ -1,0 +1,40 @@
+# Settings for Backend (on Cloud Run).
+# See https://firebase.google.com/docs/app-hosting/configure#cloud-run
+runConfig:
+  minInstances: 0
+  # maxInstances: 100
+  # concurrency: 80
+  # cpu: 1
+  # memoryMiB: 512
+
+runtimeConfig:
+  nodeVersion: '20'
+
+environmentVariables:
+  - variable: VITE_FIREBASE_API_KEY
+    secret: "AIzaSyBdc7wyTy18etoxdGmXHgRsYJvHICbolR8"
+  - variable: VITE_FIREBASE_AUTH_DOMAIN
+    secret: "sapa-nr.firebaseapp.com"
+  - variable: VITE_FIREBASE_PROJECT_ID
+    secret: "sapa-nr"
+  - variable: VITE_FIREBASE_STORAGE_BUCKET
+    secret: "sapa-nr.firebasestorage.app"
+  - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
+    secret : "579859985153"
+  - varibale: VITE_FIREBASE_APP_ID
+    secret : "1:579859985153:web:c5503f00d5fa08bead6100"
+
+# Environment variables and secrets.
+# env:
+  # Configure environment variables.
+  # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
+  # - variable: MESSAGE
+  #   value: Hello world!
+  #   availability:
+  #     - BUILD
+  #     - RUNTIME
+
+  # Grant access to secrets in Cloud Secret Manager.
+  # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
+  # - variable: MY_SECRET
+  #   secret: mySecretRef

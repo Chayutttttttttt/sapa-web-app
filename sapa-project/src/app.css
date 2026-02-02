@@ -1,0 +1,89 @@
+body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: "Plus Jakarta Sans", "Noto Sans Thai", sans-serif;
+  /* background-color moved to #bg-canvas */
+  -webkit-tap-highlight-color: transparent;
+  color: #0f172a; /* slate-900 */
+}
+
+#bg-canvas {
+  overflow-x: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #f0f9ff; /* sky-50 background */
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glass Effect */
+.glass-header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Nav logic */
+.nav-item {
+  position: relative;
+  transition: all 0.3s ease;
+}
+.nav-item.active {
+  color: #1e3a8a; /* blue-900 (Navy) */
+}
+.nav-indicator {
+  position: absolute;
+  bottom: -8px;
+  width: 4px;
+  height: 4px;
+  background: #1e3a8a; /* blue-900 (Navy) */
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.nav-item.active .nav-indicator {
+  opacity: 1;
+  transform: scale(1.5);
+}
+
+/* Tab Logic */
+.tab-btn {
+  position: relative;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+}
+.tab-btn.active {
+  color: #1e3a8a; /* blue-900 */
+}
+.tab-btn::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #1e3a8a; /* blue-900 */
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+.tab-btn.active::after {
+  width: 100%;
+}
