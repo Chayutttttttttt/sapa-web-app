@@ -13,9 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm run build
+
+      - name: Install Dependencies
+        working-directory: sapa-project
+        run: npm ci
+
+      - name: Build Project
+        working-directory: sapa-project
+        run: npm run build
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SAPA_NR }}
           projectId: sapa-nr
+          entryPoint: sapa-project
