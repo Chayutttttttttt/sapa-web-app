@@ -3,7 +3,7 @@ import { addDoc, serverTimestamp } from "firebase/firestore";
 import { collection } from "firebase/firestore";
 
 export async function commentPost(postID,navigateTo,user,content) {
-    if (!user) return navigateTo("login");
+    if (!user) return navigateTo("/login");
     try {
         const commentsRef = collection(db, "posts", postID, "comments");
         await addDoc(commentsRef, {
