@@ -18,5 +18,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SAPA_NR }}
-          projectId: sapa-project
+          projectId: sapa-nr
           entryPoint: ./sapa-project
