@@ -12,6 +12,7 @@ const Parties = lazy(() => import("./components/Parties"));
 const Navbar = lazy(() => import("./components/Navbar"));
 const Header = lazy(() => import("./components/Header"));
 const Footer = lazy(() => import("./components/Footer.jsx"));
+const Debate = lazy(() => import("./components/Debate.jsx"))
 
 const PartyHome = lazy(() => import("./components/party/PartyHome.jsx"));
 const PartyCreatePosts = lazy(() => import("./components/party/PartyCreatePosts.jsx"));
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/profile/:id" element={<Profile navigateTo={(path) => navigate(path)} />} />
             <Route path="/party/:partyId/post/:postId" element={<PostDetail navigateTo={(path) => navigate(path)} />} />
             <Route path="/vote" element={<Vote />} />
+            <Route path="/debate" element={<Debate/>}/>
             <Route path="/login" element={<Login navigateTo={(path) => navigate(path)} />} />
             <Route path="/partyLogin" element={<PartyLogin navigateTo={(path) => navigate(path)} />} />
             <Route path="/partyAdmin/:id" element={<PartyHome navigateTo={(path) => navigate(path)} />} />
