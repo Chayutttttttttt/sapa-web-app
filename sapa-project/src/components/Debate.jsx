@@ -14,11 +14,13 @@ export default function Debate() {
     const [isVote,setIsVote] = useState(false);
     const [isSending,setIsSending] = useState(false);
     const [isDebateDay, setIsDebateDay] = useState(false);
+    const [loading,setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
     const DebateDate = new Date('2026-02-12T15:25:10+07:00');
 
     useEffect(() => {
         if (!user) return;
+        setLoading(true);
         const cachedVote = localStorage.getItem('voted_debate')
         const fetchData = async () => {
             try {
@@ -32,6 +34,8 @@ export default function Debate() {
                 }
             } catch (error) {
                 console.error("Error checking vote status:", error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -138,6 +142,10 @@ export default function Debate() {
             img:'https://i.postimg.cc/dVFb15kG/debate_p3.png'
         }
     ];
+
+    if (loading) {
+        return <div className="p-10 text-center">กำลังโหลดข้อมูล...</div>;
+    }
 
     if (!isDebateDay) {
         return (

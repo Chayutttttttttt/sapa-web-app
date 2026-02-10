@@ -66,7 +66,6 @@ export default function Vote() {
     }, []);
 
     
-
     if (loading) return null;
 
     return (
