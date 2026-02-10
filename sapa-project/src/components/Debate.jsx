@@ -13,18 +13,19 @@ export default function Debate() {
     const [choseDebateParty,setChoseDebateParty] = useState('');
     const [isVote,setIsVote] = useState(false);
     const [isSending,setIsSending] = useState(false);
-    const [isDebateDay, setIsDebateDay] = useState(false);
+    const [isDebateDay, setIsDebateDay] = useState(true);
     const [timeLeft, setTimeLeft] = useState("");
     const DebateDate = new Date('2026-02-12T15:25:10+07:00');
 
     useEffect(() => {
         if (!user) return;
+        const cachedVote = localStorage.getItem('voted_debate')
         const fetchData = async () => {
             try {
                 const allVoter = collectionGroup(db, 'voter');
                 const q = query(allVoter, where("uid", "==", user.uid)); 
                 const queryDocs = await getDocs(q);
-                if (!queryDocs.empty) {
+                if (!queryDocs.empty || cachedVote === 'true') {
                     setIsVote(true);
                 } else {
                     setIsVote(false);
@@ -42,7 +43,7 @@ export default function Debate() {
             const difference = DebateDate - now;
 
             if (difference <= 0) {
-                setIsElectionDay(true);
+                setIsDebateDay(true);
                 clearInterval(timer);
                 return true;
             } else {
@@ -58,6 +59,7 @@ export default function Debate() {
     }, []);
 
     const voteDebate = async (PID) => {
+        
         if (!user || isVote) return;
         
         setIsSending(true);
@@ -112,7 +114,7 @@ export default function Debate() {
             });
         } finally {
             setIsSending(false);
-            
+            localStorage.setItem('voted_debate',true)
         };
     };
 
