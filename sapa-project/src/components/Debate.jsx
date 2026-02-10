@@ -159,7 +159,7 @@ export default function Debate() {
                         <Timer className="w-4 h-4" />
                         <span className="text-[10px] font-black uppercase tracking-wider">นับถอยหลังสู่การดีเบต</span>
                     </div>
-                    <div className="text-lg font-black text-blue-900 tabular-nums">
+                    <div className="text-lg font-black text-blue-900 tabular-nums pb-2">
                         {timeLeft || "กำลังคำนวณ..."}
                     </div>
                     
