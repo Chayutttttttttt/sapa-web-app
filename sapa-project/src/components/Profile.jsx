@@ -126,7 +126,7 @@ export default function Profile() {
                   : 'bg-white border-slate-100 shadow-sm'
               }`}>
                 <div className="w-auto h-auto mx-auto rounded-2xl mb-4 overflow-hidden border-4 border-white shadow-md">
-                  <img src={m.img} alt={m.name} className="w-full h-full object-cover" />
+                  <img src={m?.img} alt={m.name} className="w-full h-full object-cover" />
                 </div>
                 <h6 className={`font-black text-sm mb-1 ${m.role === 'ADMIN' ? 'text-red-950' : 'text-blue-950'}`}>
                   {m.name}

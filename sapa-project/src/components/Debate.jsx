@@ -1,12 +1,121 @@
 import { useState,useEffect } from "react";
-import { doc,addDoc } from "firebase/firestore";
+import { collectionGroup, query, where, doc ,getDocs ,collection, updateDoc, increment, addDoc } from "firebase/firestore";
+import { db } from "../data/firebase";
 import { useAuth } from "./Context";
+import { useNavigate } from "react-router-dom";
+import { Check,Lock,Timer } from "lucide-react"; 
+
+import Swal from "sweetalert2";
 
 export default function Debate() {
-    const { user } = useAuth()
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [choseDebateParty,setChoseDebateParty] = useState('');
     const [isVote,setIsVote] = useState(false);
-    
+    const [isSending,setIsSending] = useState(false);
+    const [isDebateDay, setIsDebateDay] = useState(false);
+    const [timeLeft, setTimeLeft] = useState("");
+    const DebateDate = new Date('2026-02-12T15:25:10+07:00');
+
+    useEffect(() => {
+        if (!user) return;
+        const fetchData = async () => {
+            try {
+                const allVoter = collectionGroup(db, 'voter');
+                const q = query(allVoter, where("uid", "==", user.uid)); 
+                const queryDocs = await getDocs(q);
+                if (!queryDocs.empty) {
+                    setIsVote(true);
+                } else {
+                    setIsVote(false);
+                }
+            } catch (error) {
+                console.error("Error checking vote status:", error);
+            }
+        };
+        fetchData();
+    }, [user]);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const now = new Date();
+            const difference = DebateDate - now;
+
+            if (difference <= 0) {
+                setIsElectionDay(true);
+                clearInterval(timer);
+                return true;
+            } else {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((difference / 1000 / 60) % 60);
+                const seconds = Math.floor((difference / 1000) % 60);
+                setTimeLeft(`${days} วัน ${hours} ชม ${minutes} นาที ${seconds} วิ`);
+            }
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    const voteDebate = async (PID) => {
+        if (!user || isVote) return;
+        
+        setIsSending(true);
+
+        try {
+            const q = query(collection(db,'parties'), where("UID","==",PID));
+            const querySnapshot = await getDocs(q);
+            
+            if (!querySnapshot.empty) {
+
+                const partyDocId = querySnapshot.docs[0].id;
+                const partyRef = doc(db,'parties',partyDocId);
+
+                await updateDoc(partyRef, {vote:increment(1)});
+
+                try {
+                    const subCollection = collection(db, 'parties', partyDocId, 'voter');
+                    await addDoc(subCollection, {
+                        uid: user.uid,
+                        votedAt: new Date()
+                    });
+                } catch (error) {
+                    console.error("บันทึกข้อมูลการโหวตลง Sub-collection ไม่สำเร็จ:", error );
+                    Swal.fire({
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'กรุณาลองใหม่อีกครั้ง',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#d33'
+                    });
+                };
+
+                Swal.fire({
+                    title: 'ส่งคะแนนสำเร็จ!',
+                    text: 'ขอบคุณที่ร่วมส่งเสียงให้พรรคที่คุณเชียร์ครับ',
+                    icon: 'success',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed) navigate('/');
+                });
+            };
+
+        } catch (error) {
+            console.error("เกิดข้อผิดพลาด:", error);
+            Swal.fire({
+                title: 'เกิดข้อผิดพลาด',
+                text: 'กรุณาลองใหม่อีกครั้ง',
+                icon: 'error',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#d33'
+            });
+        } finally {
+            setIsSending(false);
+            
+        };
+    };
+
     const cards = [
         {
             id:'p1',
@@ -26,31 +135,148 @@ export default function Debate() {
             name:'NR NEXT GEN',
             img:'https://i.postimg.cc/dVFb15kG/debate_p3.png'
         }
-    ]
+    ];
+
+    if (!isDebateDay) {
+        return (
+            <div className="gap-2 animate-fade-up min-h-screen flex flex-col items-center pt-20 pb-32 bg-[#F8FAFC] text-center px-6 w-full">
+                <div className="relative mb-2">
+                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-xl mx-auto relative z-10">
+                        <Lock className="w-10 h-10 text-blue-600 animate-bounce"/>
+                    </div>
+                    <div className="absolute inset-0 bg-blue-200 blur-2xl opacity-30 rounded-full scale-110"></div>
+                </div>
+
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-black text-blue-950 tracking-tight">เร็ว ๆ นี้!</h2>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Debate is coming</p>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-white shadow-lg">
+                    <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
+                        <Timer className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-wider">นับถอยหลังสู่การดีเบต</span>
+                    </div>
+                    <div className="text-lg font-black text-blue-900 tabular-nums">
+                        {timeLeft || "กำลังคำนวณ..."}
+                    </div>
+                    
+                    <div className="justify-center items-center rounded-2xl">
+                        <img src="https://i.postimg.cc/grF8B0Rb/S8298541.jpg" alt="Debate" className="w-90 items-center overflow-hidden rounded-2xl"/>
+                    </div>
+
+                    <p className="mt-3 text-slate-500 text-xs leading-relaxed px-2">
+                        *ท่านจะสามารถเข้าถึงหน้านี้ได้เพื่อดูโหวตเมื่อถึงเวลาที่กำหนดเท่านั้น
+                    </p>
+                </div>
+
+                {!user && (
+                    <button 
+                        onClick={() => navigate('/login')}
+                        className="mt-2 text-blue-600 font-black text-[10px] uppercase tracking-widest hover:underline cursor-pointer transition-all"
+                    >
+                        เข้าสู่ระบบเพื่อเตรียมพร้อม &rarr;
+                    </button>
+                )}
+            </div>
+        )
+    }
+
+    if (!user) {
+        return (
+            <div className="gap-2 animate-fade-up min-h-screen flex flex-col items-center pt-20 pb-32 bg-[#F8FAFC] text-center px-6 w-full">
+                <div className="relative mb-2">
+                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-xl mx-auto relative z-10">
+                        <Lock className="w-10 h-10 text-blue-600 animate-bounce"/>
+                    </div>
+                    <div className="absolute inset-0 bg-blue-200 blur-2xl opacity-30 rounded-full scale-110"></div>
+                </div>
+
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-black text-blue-950 tracking-tight">กรุณาเข้าสู่ระบบเพื่อโหวตพรรคที่ท่านชอบ</h2>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Locked</p>
+                </div>
+
+                <button 
+                    onClick={() => navigate('/login')}
+                    className="mt-2 text-blue-600 font-black text-ms uppercase tracking-widest hover:underline cursor-pointer transition-all"
+                >
+                    เข้าสู่ระบบเพื่อเตรียมพร้อม &rarr;
+                </button>
+            </div>
+        )
+    };
     
     return (
-        <div className='transition-all' style={{backgroundColor: choseDebateParty && `${choseDebateParty.color}20`}}>
-            <div className='animate-fade-up pb-25 min-h-screen relative max-w-xl mx-auto px-6 pt-8 '>
-                <h2 className="text-center font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-slate-900 to-slate-700 md:text-3xl text-xl mb-4">
-                    คุณชอบการ DEBATE <span className="text-blue-600">ของพรรคไหน?</span>
-                </h2>
-                {cards.map((p) => {
-                    return (
-                        <div key={p.id} className="w-full flex flex-col justify-center items-center">
-                            <img 
-                                src={p.img} 
-                                onClick={() => setChoseDebateParty(p)} 
-                                className={`transition-all hover:cursor-pointer hover:scale-105 ${
-                                    choseDebateParty.id === p.id ? 'w-100' : 'grayscale w-90'
-                                }`} 
-                                alt={p.name} 
-                            />
-                            <p className="text-xl font-black pb-1">{p.name}</p>
+        <div>
+            {!isVote ? (
+                <div className='transition-all' style={{backgroundColor: choseDebateParty && `${choseDebateParty.color}20`}}>
+                    <div className='animate-fade-up pb-20 min-h-screen relative max-w-xl mx-auto px-6 pt-8 '>
+                        <div className="text-center mb-5">
+                            <img src="https://i.postimg.cc/VNffWcJD/Debate.png" className="w-full h-full"/>
+                            <p className="text-slate-500 text-sm md:text-base">คลิกที่รูปภาพเพื่อเลือกพรรคที่คุณประทับใจ</p>
                         </div>
-                    )
-                })}
-            </div>
+                        {cards.map((p) => {
+                            return (
+                                <div key={p.id} className="w-full flex flex-col justify-center items-center">
+                                    <img 
+                                        src={p.img} 
+                                        onClick={() => setChoseDebateParty(p)} 
+                                        className={`transition-all hover:cursor-pointer hover:scale-105 ${
+                                            choseDebateParty.id === p.id ? 'w-100' : 'grayscale w-90'
+                                        }`} 
+                                        alt={p.name} 
+                                    />
+                                    <p className={`text-lg font-black transition-colors ${choseDebateParty.id === p.id ? 'text-slate-900' : 'text-slate-500'}`}>
+                                        {p.name}
+                                    </p>
+                                </div>
+                            )
+                        })}
+                        <div className="flex justify-center bottom-20">
+                            <button 
+                                disabled={!choseDebateParty}
+                                onClick={() => voteDebate(choseDebateParty.id)}
+                                className={`mt-10 group md:text-xl flex items-center gap-2 py-4 px-10 rounded-full font-bold text-ms transition-all duration-300 shadow-lg active:scale-95
+                                    ${choseDebateParty 
+                                        ? 'bg-slate-900 text-white hover:shadow-2xl hover:cursor-pointer' 
+                                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                            >
+                                {isSending ? (
+                                    "กำลังบันทึกข้อมูล..."
+                                ):(
+                                    <>
+                                        {choseDebateParty ? `ยืนยันเลือกพรรค ${choseDebateParty.name}` : 'กรุณาเลือกพรรคที่ชอบ'}
+                                        {choseDebateParty && <span className="group-hover:translate-x-1 transition-transform">→</span>}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ):(
+                <div className="gap-2 animate-fade-up min-h-screen flex flex-col items-center pt-20 pb-32 bg-green-100 text-center px-6 w-full">
+                    <div className="relative mb-2">
+                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-xl mx-auto relative z-10">
+                            <Check className="w-10 h-10 text-green-600"/>
+                        </div>
+                        <div className="absolute inset-0 bg-blue-200 blur-2xl opacity-30 rounded-full scale-110"></div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <h2 className="text-3xl font-black text-green-950 tracking-tight">คุณเลือกเรียบร้อยเเล้ว</h2>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">กรุณากลับสู่หน้าหลัก</p>
+                    </div>
+                    <button 
+                        onClick={() => navigate('/')}
+                        className="mt-2 text-blue-600 font-black text-ms uppercase tracking-widest hover:underline cursor-pointer transition-all"
+                    >
+                        กลับสู่หน้าหลัก &rarr;
+                    </button>
+                </div>
+            )}
         </div>
+        
         
     )
 };

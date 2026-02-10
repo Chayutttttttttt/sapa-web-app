@@ -67,7 +67,6 @@ export default function PartyCreatePosts({ PARTIES }) {
         let imgURL = "";
         
         try {
-            // 1. จัดการการอัปโหลดรูปภาพ (ถ้ามี)
             if (hasImage && imgFile) {
                 const maxSize = 2 * 1024 * 1024; 
                 if (imgFile.size > maxSize) {
@@ -81,7 +80,6 @@ export default function PartyCreatePosts({ PARTIES }) {
                 imgURL = await getDownloadURL(snapshot.ref);
             }
 
-            // 2. บันทึกข้อมูลลง Firestore
             const postRef = await addDoc(collection(db, "posts"), {
                 partyID: party.id,
                 content: content,
@@ -92,7 +90,6 @@ export default function PartyCreatePosts({ PARTIES }) {
                 likes: 0,
             });
 
-            // 3. สร้าง Placeholder สำหรับ Collection Comments
             await addDoc(collection(db, "posts", postRef.id, "comments"), {
                 _status: "initial_placeholder",
             });
@@ -119,7 +116,6 @@ export default function PartyCreatePosts({ PARTIES }) {
     return (
         <div className="animate-fade-up min-h-screen bg-slate-50 pb-28 pt-8 px-6">
             <div className="max-w-xl mx-auto">
-                {/* Header ย้อนกลับ */}
                 <button 
                     onClick={() => navigate(`/partyAdmin/${id}`)}
                     className="flex items-center gap-2 text-slate-500 font-bold text-sm mb-6 hover:text-blue-600 transition-colors cursor-pointer"
@@ -134,7 +130,6 @@ export default function PartyCreatePosts({ PARTIES }) {
                     </div>
 
                     <div className="p-6 space-y-5">
-                        {/* Input หัวข้อ */}
                         <div>
                             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">หัวข้อโพสต์</label>
                             <input 
@@ -145,8 +140,6 @@ export default function PartyCreatePosts({ PARTIES }) {
                                 className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-bold text-slate-700"
                             />
                         </div>
-
-                        {/* Input รายละเอียด */}
                         <div>
                             <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">รายละเอียดนโยบาย</label>
                             <textarea
@@ -157,8 +150,6 @@ export default function PartyCreatePosts({ PARTIES }) {
                                 className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-600 leading-relaxed"
                             ></textarea>
                         </div>
-
-                        {/* ส่วนอัปโหลดรูปภาพ */}
                         <div className="pt-2">
                             <label className="inline-flex items-center cursor-pointer group">
                                 <input 
@@ -195,8 +186,6 @@ export default function PartyCreatePosts({ PARTIES }) {
                                 </div>
                             )}
                         </div>
-
-                        {/* ปุ่มกดสร้างโพสต์ */}
                         <div className="pt-4 flex gap-3">
                             <button 
                                 disabled={isUploading}
