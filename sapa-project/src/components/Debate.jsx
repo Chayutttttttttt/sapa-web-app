@@ -13,7 +13,7 @@ export default function Debate() {
     const [choseDebateParty,setChoseDebateParty] = useState('');
     const [isVote,setIsVote] = useState(false);
     const [isSending,setIsSending] = useState(false);
-    const [isDebateDay, setIsDebateDay] = useState(true);
+    const [isDebateDay, setIsDebateDay] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
     const DebateDate = new Date('2026-02-12T15:25:10+07:00');
 
