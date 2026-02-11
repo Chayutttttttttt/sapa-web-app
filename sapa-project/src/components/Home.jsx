@@ -22,7 +22,7 @@ export default function Home({ sortBy }) {
     const postsRef = collection(db, "posts");
     const q = query(
       postsRef, 
-      orderBy("date", sortBy === "newest" ? "desc" : "asc"), 
+      orderBy("date","desc"), 
       limit(20)
     );
 
