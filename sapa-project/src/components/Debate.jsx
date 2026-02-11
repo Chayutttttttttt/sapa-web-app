@@ -1,5 +1,5 @@
 import { useState,useEffect } from "react";
-import { collectionGroup, query, where, doc ,getDocs ,collection, updateDoc, increment, addDoc } from "firebase/firestore";
+import { query, where, doc ,getDocs ,collection, updateDoc, increment, addDoc } from "firebase/firestore";
 import { db } from "../data/firebase";
 import { useAuth } from "./Context";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,9 @@ export default function Debate() {
     const [loading,setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
     const DebateDate = new Date('2026-02-12T15:25:10+07:00');
+    
+    const [description,setDescription] = useState("");
+    const [sec,setSec] = useState("");
 
     useEffect(() => {
         if (!user) return;
@@ -24,10 +27,10 @@ export default function Debate() {
         const cachedVote = localStorage.getItem('voted_debate')
         const fetchData = async () => {
             try {
-                const allVoter = collectionGroup(db, 'voter');
-                const q = query(allVoter, where("uid", "==", user.uid)); 
+                const debate = collection(db, 'debate');
+                const q = query(debate, where("uid", "==", user.uid)); 
                 const queryDocs = await getDocs(q);
-                if (!queryDocs.empty || cachedVote === 'true') {
+                if (!queryDocs.empty) {
                     setIsVote(true);
                 } else {
                     setIsVote(false);
@@ -73,28 +76,18 @@ export default function Debate() {
             const querySnapshot = await getDocs(q);
             
             if (!querySnapshot.empty) {
-
                 const partyDocId = querySnapshot.docs[0].id;
                 const partyRef = doc(db,'parties',partyDocId);
-
                 await updateDoc(partyRef, {vote:increment(1)});
 
-                try {
-                    const subCollection = collection(db, 'parties', partyDocId, 'voter');
-                    await addDoc(subCollection, {
-                        uid: user.uid,
-                        votedAt: new Date()
-                    });
-                } catch (error) {
-                    console.error("บันทึกข้อมูลการโหวตลง Sub-collection ไม่สำเร็จ:", error );
-                    Swal.fire({
-                        title: 'เกิดข้อผิดพลาด',
-                        text: 'กรุณาลองใหม่อีกครั้ง',
-                        icon: 'error',
-                        confirmButtonText: 'ตกลง',
-                        confirmButtonColor: '#d33'
-                    });
-                };
+                const debateData = collection(db,'debate');
+                await addDoc(debateData, {
+                    uid: user.uid,
+                    vote: PID,
+                    secondary: sec,
+                    description: description,
+                    date: new Date()
+                });
 
                 Swal.fire({
                     title: 'ส่งคะแนนสำเร็จ!',
@@ -121,6 +114,7 @@ export default function Debate() {
             localStorage.setItem('voted_debate',true)
         };
     };
+
 
     const cards = [
         {
@@ -190,7 +184,9 @@ export default function Debate() {
                 )}
             </div>
         )
-    }
+    };
+
+    console.log(sec)
 
     if (!user) {
         return (
@@ -243,12 +239,37 @@ export default function Debate() {
                                 </div>
                             )
                         })}
-                        <div className="flex justify-center bottom-20">
+                        <div className="flex flex-col justify-center mt-20 bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md">
+                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">คุณอยู่ระดับชั้นไหน</label>
+                            <select
+                                className="w-full h-12 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl appearance-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer text-gray-700"
+                                defaultValue=""
+                                onChange={(e) => setSec(e.target.value)}
+                                >
+                                <option value="" disabled>-- กรุณาเลือก --</option>
+                                <option value="m1">มัธยมศึกษาปีที่ 1 (ม.1)</option>
+                                <option value="m2">มัธยมศึกษาปีที่ 2 (ม.2)</option>
+                                <option value="m3">มัธยมศึกษาปีที่ 3 (ม.3)</option>
+                                <option value="m4">มัธยมศึกษาปีที่ 4 (ม.4)</option>
+                                <option value="m5">มัธยมศึกษาปีที่ 5 (ม.5)</option>
+                                <option value="m6">มัธยมศึกษาปีที่ 6 (ม.6)</option>
+                                <option value="admin">บุคลากร</option>
+                            </select>
+                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">คุณเลือกพรรคนี้เพราะอะไร</label>
+                            <input
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                type="text"
+                                placeholder="พิมพ์ที่นี่..."
+                                className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-bold text-slate-700"
+                            />
+                        </div>
+                        <div className="justify-center flex">
                             <button 
                                 disabled={!choseDebateParty}
                                 onClick={() => voteDebate(choseDebateParty.id)}
-                                className={`mt-10 group md:text-xl flex items-center gap-2 py-4 px-10 rounded-full font-bold text-ms transition-all duration-300 shadow-lg active:scale-95
-                                    ${choseDebateParty 
+                                className={` mt-10 group md:text-xl flex items-center gap-2 py-4 px-10 rounded-full font-bold text-ms transition-all duration-300 shadow-lg active:scale-95
+                                    ${choseDebateParty && description && sec
                                         ? 'bg-slate-900 text-white hover:shadow-2xl hover:cursor-pointer' 
                                         : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                             >
@@ -256,8 +277,8 @@ export default function Debate() {
                                     "กำลังบันทึกข้อมูล..."
                                 ):(
                                     <>
-                                        {choseDebateParty ? `ยืนยันเลือกพรรค ${choseDebateParty.name}` : 'กรุณาเลือกพรรคที่ชอบ'}
-                                        {choseDebateParty && <span className="group-hover:translate-x-1 transition-transform">→</span>}
+                                        {choseDebateParty && description && sec ? `ยืนยันเลือกพรรค ${choseDebateParty.name}` : 'กรุณาเลือกพรรคที่ชอบ เเละใส่ข้อมูลให้ครบถ้วน'}
+                                        {choseDebateParty && description && sec && <span className="group-hover:translate-x-1 transition-transform">→</span>}
                                     </>
                                 )}
                             </button>

@@ -81,7 +81,7 @@ export default function PartyCreatePosts({ PARTIES }) {
             }
 
             const postRef = await addDoc(collection(db, "posts"), {
-                partyID: party.id,
+                partyID: party.UID,
                 content: content,
                 description: description,
                 hasImage: hasImage,

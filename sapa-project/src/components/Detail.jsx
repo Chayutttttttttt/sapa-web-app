@@ -102,7 +102,7 @@ export default function PostDetail() {
         <p className="text-slate-400 text-sm ">{formatDate(post.date?.toDate ? post.date.toDate() : post.date)}</p>
         <div className="pt-2 flex items-center">
           <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-900 relative overflow-hidden">
-            <img src={`/${party.img}`} alt="" className="w-full h-full object-cover"/>
+            <img src={party.img} alt="" className="w-full h-full object-cover"/>
           </div>
           <span className="font-medium ml-3 text-[15px]">{party?.name || "ไม่ทราบชื่อพรรค"}</span>
         </div>
