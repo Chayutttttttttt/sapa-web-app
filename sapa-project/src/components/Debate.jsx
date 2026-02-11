@@ -16,10 +16,11 @@ export default function Debate() {
     const [isDebateDay, setIsDebateDay] = useState(false);
     const [loading,setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
-    const DebateDate = new Date('2026-02-12T15:25:10+07:00');
+    const DebateDate = new Date('2026-02-12T08:00:00+07:00');
     
     const [description,setDescription] = useState("");
     const [sec,setSec] = useState("");
+    const [detail,setDetail] = useState("");
 
     useEffect(() => {
         if (!user) return;
@@ -30,7 +31,7 @@ export default function Debate() {
                 const debate = collection(db, 'debate');
                 const q = query(debate, where("uid", "==", user.uid)); 
                 const queryDocs = await getDocs(q);
-                if (!queryDocs.empty) {
+                if (!queryDocs.empty || cachedVote) {
                     setIsVote(true);
                 } else {
                     setIsVote(false);
@@ -85,6 +86,7 @@ export default function Debate() {
                     uid: user.uid,
                     vote: PID,
                     secondary: sec,
+                    detail: detail,
                     description: description,
                     date: new Date()
                 });
@@ -199,7 +201,7 @@ export default function Debate() {
                 </div>
 
                 <div className="space-y-1">
-                    <h2 className="text-3xl font-black text-blue-950 tracking-tight">กรุณาเข้าสู่ระบบเพื่อโหวตพรรคที่ท่านชอบ</h2>
+                    <h2 className="text-3xl font-black text-blue-950 tracking-tight">กรุณาเข้าสู่ระบบ</h2>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Locked</p>
                 </div>
 
@@ -255,7 +257,18 @@ export default function Debate() {
                                 <option value="m6">มัธยมศึกษาปีที่ 6 (ม.6)</option>
                                 <option value="admin">บุคลากร</option>
                             </select>
-                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">คุณเลือกพรรคนี้เพราะอะไร</label>
+                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">คุณชื่นชอบพรรคนี้เพราะอะไร</label>
+                            <select
+                                className="w-full h-12 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl appearance-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer text-gray-700"
+                                defaultValue=""
+                                onChange={(e) => setDetail(e.target.value)}
+                                >
+                                <option value="" disabled>-- กรุณาเลือก --</option>
+                                <option value="member">ผู้สมัคร</option>
+                                <option value="policy">นโยบายพรรค</option>
+                                <option value="skill">ความสามารถในการตอบคำถาม</option>
+                            </select>
+                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">รายละเอียดเพิ่มเติม</label>
                             <input
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
@@ -269,7 +282,7 @@ export default function Debate() {
                                 disabled={!choseDebateParty}
                                 onClick={() => voteDebate(choseDebateParty.id)}
                                 className={` mt-10 group md:text-xl flex items-center gap-2 py-4 px-10 rounded-full font-bold text-ms transition-all duration-300 shadow-lg active:scale-95
-                                    ${choseDebateParty && description && sec
+                                    ${choseDebateParty && detail && sec
                                         ? 'bg-slate-900 text-white hover:shadow-2xl hover:cursor-pointer' 
                                         : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                             >
@@ -277,8 +290,8 @@ export default function Debate() {
                                     "กำลังบันทึกข้อมูล..."
                                 ):(
                                     <>
-                                        {choseDebateParty && description && sec ? `ยืนยันเลือกพรรค ${choseDebateParty.name}` : 'กรุณาเลือกพรรคที่ชอบ เเละใส่ข้อมูลให้ครบถ้วน'}
-                                        {choseDebateParty && description && sec && <span className="group-hover:translate-x-1 transition-transform">→</span>}
+                                        {choseDebateParty && detail && sec ? `ยืนยันเลือกพรรค ${choseDebateParty.name}` : 'กรุณาเลือกพรรคที่ชอบ เเละใส่ข้อมูลให้ครบถ้วน'}
+                                        {choseDebateParty && detail && sec && <span className="group-hover:translate-x-1 transition-transform">→</span>}
                                     </>
                                 )}
                             </button>
