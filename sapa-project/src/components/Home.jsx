@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // นำเข้า useNavigate
+import { useNavigate } from "react-router-dom";
 import { PARTIES } from "../data/parties";
 import { formatDate } from "../utils/formatDate";
 import { Heart, MessageCircleQuestion } from "lucide-react";
