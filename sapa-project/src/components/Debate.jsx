@@ -16,7 +16,7 @@ export default function Debate() {
     const [isDebateDay, setIsDebateDay] = useState(false);
     const [loading,setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
-    const DebateDate = new Date('2026-02-12T08:00:00+07:00');
+    const DebateDate = new Date('2027-02-12T08:00:00+07:00');
     
     const [description,setDescription] = useState("");
     const [sec,setSec] = useState("");
