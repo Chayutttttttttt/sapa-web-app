@@ -1,4 +1,4 @@
-import { Lock, Timer, BarChart3,Trophy } from "lucide-react";
+import { Lock, Timer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "./Context";
 import { useNavigate } from "react-router-dom";

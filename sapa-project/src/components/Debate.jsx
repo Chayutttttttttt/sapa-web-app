@@ -14,13 +14,34 @@ export default function Debate() {
     const [isVote,setIsVote] = useState(false);
     const [isSending,setIsSending] = useState(false);
     const [isDebateDay, setIsDebateDay] = useState(false);
+    const [isEndDebateDay, setIsEndDebateDay] = useState(true);
     const [loading,setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
+    const [parties, setParties] = useState(null);
+
+    const EndDebateDate = new Date('2027-02-13T08:00:00+07:00');
     const DebateDate = new Date('2027-02-12T08:00:00+07:00');
     
     const [description,setDescription] = useState("");
     const [sec,setSec] = useState("");
     const [detail,setDetail] = useState("");
+
+    useEffect(() => {
+        const fetchData = async () => {
+           try {
+                const q = query(collection(db,'parties'));
+                const querySnapshot = await getDocs(q)
+                const items = querySnapshot.docs.map(doc => ({
+                    id : doc.id,
+                    ...doc.data()
+                }));
+                setParties(items); 
+            } catch (err) {
+                console.log("Error : ",err);
+            }
+        }
+        fetchData();
+    }, []);
 
     useEffect(() => {
         if (!user) return;
@@ -142,6 +163,69 @@ export default function Debate() {
     if (loading) {
         return <div className="p-10 text-center">กำลังโหลดข้อมูล...</div>;
     }
+
+    if (isEndDebateDay) {
+        return (
+            <div className="w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
+                <div className="w-full max-w-4xl bg-white p-8 rounded-[2.5rem] border border-green-100 shadow-xl overflow-hidden">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-black text-slate-800 mb-1">ผลการดีเบต</h2>
+                        <p className="text-slate-400 text-sm font-medium">โรงเรียนนารีรัตน์จังหวัดเเพร่</p>
+                    </div>
+
+                    <div className="flex items-end justify-center gap-6 md:gap-16 w-full h-100 px-4 pb-8">
+                    {parties !== null && parties.map((p, index) => {
+                        const totalVotes = parties.reduce((sum, p) => sum + (p.vote || 0), 0);
+                        const voteShare = totalVotes > 0 ? (p.vote / totalVotes) * 100 : 0;
+                        const safeHeight = Math.max(voteShare, 25);
+
+                        return (
+                            <div
+                                key={p.id}
+                                className="group flex flex-col items-center justify-end w-1/3 max-w-37 h-full cursor-pointer transition-transform duration-300 hover:scale-105 animate-in fade-in slide-in-from-bottom-10"
+                                style={{ animationDelay: `${index * 200}ms`, animationFillMode: 'both' }}
+                            >
+                                <div className="relative w-full flex justify-center items-end h-full">
+                                    <div
+                                        className="relative w-full md:w-32 rounded-t-2xl md:rounded-t-[2.5rem] z-0 flex flex-col items-center pt-6 shadow-lg border-t border-x border-white/30 transition-all duration-1000 ease-out group-hover:brightness-110"
+                                        style={{
+                                            height: `${safeHeight}%`,
+                                            background: `linear-gradient(to top, ${p.color}40, ${p.color})`,
+                                        }}  
+                                    >
+                                        <span className="text-white font-bold text-sm md:text-lg drop-shadow-md">
+                                            {voteShare.toFixed(1)}%
+                                        </span>
+                                    </div>
+
+                                    <div className="absolute -bottom-4 z-20 transition-transform duration-500 transform group-hover:-translate-y-2">
+                                        <div
+                                            className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-white border-4 border-white shadow-xl flex items-center justify-center overflow-hidden"
+                                            style={{ outline: `2px solid ${p.color}20` }}
+                                        >
+                                            <span className="font-black text-2xl md:text-4xl" style={{ color: p.color }}>
+                                                <img src={p.logo} alt={p.name} />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="z-30 mt-10 text-center">
+                                    <div
+                                        className="inline-block text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full shadow-sm"
+                                        style={{ backgroundColor: p.color }}
+                                    >
+                                        เบอร์ {p.UID[1]} • {voteShare.toFixed(1)}%
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                    </div>
+                </div>
+            </div>
+        )
+    };
 
     if (!isDebateDay) {
         return (
