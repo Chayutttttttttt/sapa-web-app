@@ -54,7 +54,7 @@ export default function NavigationBar() {
       >
         <Vote className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
-          โหวต
+          ผลการเลือกตั้ง
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
           isActive('/vote') ? 'bg-blue-600 opacity-100' : 'opacity-0'
@@ -69,7 +69,7 @@ export default function NavigationBar() {
       >
         <ArchiveRestore className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
-          Debate
+          โหวต
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
           isActive('/debate') ? 'bg-blue-600 opacity-100' : 'opacity-0'

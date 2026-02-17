@@ -1,5 +1,5 @@
 import { useState,useEffect } from "react";
-import { query, where, doc ,getDocs ,collection, updateDoc, increment, addDoc } from "firebase/firestore";
+import { query, where, doc ,getDocs ,collection, updateDoc, increment, addDoc,getCountFromServer } from "firebase/firestore";
 import { db } from "../data/firebase";
 import { useAuth } from "./Context";
 import { useNavigate } from "react-router-dom";
@@ -7,225 +7,268 @@ import { Check,Lock,Timer } from "lucide-react";
 
 import Swal from "sweetalert2";
 
+// Component สำหรับ Animated Counter
+function AnimatedCounter({ finalValue, duration = 1000 }) {
+    const [displayValue, setDisplayValue] = useState(0);
+
+    useEffect(() => {
+        let startTime = Date.now();
+        let animationFrame;
+
+        const animate = () => {
+            const now = Date.now();
+            const progress = Math.min((now - startTime) / duration, 1);
+            const currentValue = progress * finalValue;
+            setDisplayValue(currentValue);
+
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+
+        return () => cancelAnimationFrame(animationFrame);
+    }, [finalValue, duration]);
+
+    return displayValue.toFixed(1);
+}
+
 export default function Debate() {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [choseDebateParty,setChoseDebateParty] = useState('');
-    const [isVote,setIsVote] = useState(false);
-    const [isSending,setIsSending] = useState(false);
+    const [choseDebateParty, setChoseDebateParty] = useState('');
+    const [isVote, setIsVote] = useState(false);
+    const [isSending, setIsSending] = useState(false);
     const [isDebateDay, setIsDebateDay] = useState(false);
-    const [isEndDebateDay, setIsEndDebateDay] = useState(true);
-    const [loading,setLoading] = useState(false);
+    const [isDebateEnded, setIsDebateEnded] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
-    const [parties, setParties] = useState(null);
+    const [disk,setdisk] = useState("poll")
+    const [parties, setParties] = useState([]);
 
-    const EndDebateDate = new Date('2027-02-13T08:00:00+07:00');
-    const DebateDate = new Date('2027-02-12T08:00:00+07:00');
+    const DebateDate = new Date('2026-02-18T08:00:00+07:00');
+    const DebateEndDate = new Date('2026-02-18T08:20:00+07:00');
     
-    const [description,setDescription] = useState("");
-    const [sec,setSec] = useState("");
-    const [detail,setDetail] = useState("");
+    const [description, setDescription] = useState("");
+    const [sec, setSec] = useState("");
+    const [detail, setDetail] = useState("");
 
+    // 1. ดึงข้อมูลพรรค และนับคะแนนจาก collection 'debate'
     useEffect(() => {
-        const fetchData = async () => {
-           try {
-                const q = query(collection(db,'parties'));
-                const querySnapshot = await getDocs(q)
-                const items = querySnapshot.docs.map(doc => ({
-                    id : doc.id,
+        const fetchPartiesAndVotes = async () => {
+            try {
+                const partySnap = await getDocs(collection(db, 'parties'));
+                const partyList = partySnap.docs.map(doc => ({
+                    id: doc.id,
                     ...doc.data()
                 }));
-                setParties(items); 
+
+                // นับคะแนนสดๆ จาก collection 'debate' สำหรับแต่ละพรรค
+                const partiesWithLiveVotes = await Promise.all(partyList.map(async (party) => {
+                    const q = query(collection(db, disk), where("vote", "==", party.UID));
+                    const countSnap = await getCountFromServer(q);
+                    return { ...party, voteCount: countSnap.data().count };
+                }));
+
+                setParties(partiesWithLiveVotes);
             } catch (err) {
-                console.log("Error : ",err);
+                console.error("Error fetching data: ", err);
             }
-        }
-        fetchData();
+        };
+        fetchPartiesAndVotes();
     }, []);
 
+    // 2. ตรวจสอบสถานะการโหวตของผู้ใช้
     useEffect(() => {
         if (!user) return;
-        setLoading(true);
-        const cachedVote = localStorage.getItem('voted_debate')
-        const fetchData = async () => {
+        const checkUserVote = async () => {
+            setLoading(true);
+            const cachedVote = localStorage.getItem('voted');
+
             try {
-                const debate = collection(db, 'debate');
-                const q = query(debate, where("uid", "==", user.uid)); 
+                const q = query(collection(db, disk), where("uid", "==", user.uid));
                 const queryDocs = await getDocs(q);
-                if (!queryDocs.empty || cachedVote) {
-                    setIsVote(true);
-                } else {
-                    setIsVote(false);
-                }
+                setIsVote(!queryDocs.empty || !!cachedVote);
             } catch (error) {
                 console.error("Error checking vote status:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
+        checkUserVote();
     }, [user]);
 
+    // 3. Timer Logic
     useEffect(() => {
         const timer = setInterval(() => {
             const now = new Date();
-            const difference = DebateDate - now;
-
-            if (difference <= 0) {
-                setIsDebateDay(true);
+            const differenceEnd = DebateEndDate - now;
+            const differenceStart = DebateDate - now;
+            
+            // ตรวจสอบว่าถึงเวลาปิดการโหวตแล้ว (08:30)
+            if (differenceEnd <= 0) {
+                setIsDebateEnded(true);
+                setIsDebateDay(false);
                 clearInterval(timer);
-                return true;
-            } else {
-                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-                const minutes = Math.floor((difference / 1000 / 60) % 60);
-                const seconds = Math.floor((difference / 1000) % 60);
+            } 
+            // ตรวจสอบว่าถึงเวลาเปิดการโหวต (08:00) แล้ว
+            else if (differenceStart <= 0 && !isDebateDay) {
+                setIsDebateDay(true);
+            } 
+            // แสดงเวลานับถอยหลังจนกว่าจะถึง 08:00
+            else if (differenceStart > 0) {
+                const days = Math.floor(differenceStart / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((differenceStart / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((differenceStart / 1000 / 60) % 60);
+                const seconds = Math.floor((differenceStart / 1000) % 60);
+                setTimeLeft(`${days} วัน ${hours} ชม ${minutes} นาที ${seconds} วิ`);
+            } else if (differenceStart < 0 && differenceEnd > 0) {
+                const days = Math.floor(differenceEnd / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((differenceEnd / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((differenceEnd / 1000 / 60) % 60);
+                const seconds = Math.floor((differenceEnd / 1000) % 60);
                 setTimeLeft(`${days} วัน ${hours} ชม ${minutes} นาที ${seconds} วิ`);
             }
         }, 1000);
-
         return () => clearInterval(timer);
-    }, []);
+    }, [isDebateDay]);
 
+    // 4. ฟังก์ชันส่งผลโหวต (เน้นเขียนลงคอลเลกชัน debate)
     const voteDebate = async (PID) => {
-        
         if (!user || isVote) return;
-        
         setIsSending(true);
-
         try {
-            const q = query(collection(db,'parties'), where("UID","==",PID));
-            const querySnapshot = await getDocs(q);
-            
-            if (!querySnapshot.empty) {
-                const partyDocId = querySnapshot.docs[0].id;
-                const partyRef = doc(db,'parties',partyDocId);
-                await updateDoc(partyRef, {vote:increment(1)});
-
-                const debateData = collection(db,'debate');
-                await addDoc(debateData, {
-                    uid: user.uid,
-                    vote: PID,
-                    secondary: sec,
-                    detail: detail,
-                    description: description,
-                    date: new Date()
-                });
-
-                Swal.fire({
-                    title: 'ส่งคะแนนสำเร็จ!',
-                    text: 'ขอบคุณที่ร่วมส่งเสียงให้พรรคที่คุณเชียร์ครับ',
-                    icon: 'success',
-                    confirmButtonText: 'ตกลง',
-                    confirmButtonColor: '#3085d6'
-                }).then((result) => {
-                    if (result.isConfirmed) navigate('/');
-                });
-            };
-
-        } catch (error) {
-            console.error("เกิดข้อผิดพลาด:", error);
-            Swal.fire({
-                title: 'เกิดข้อผิดพลาด',
-                text: 'กรุณาลองใหม่อีกครั้ง',
-                icon: 'error',
-                confirmButtonText: 'ตกลง',
-                confirmButtonColor: '#d33'
+            await addDoc(collection(db, disk), {
+                uid: user.uid,
+                vote: PID, // เก็บ ID ของพรรคที่เลือก
+                secondary: sec,
+                detail: detail,
+                description: description,
+                date: new Date()
             });
+
+            localStorage.setItem('voted', true);
+            
+            Swal.fire({
+                title: 'ส่งคะแนนสำเร็จ!',
+                text: 'ขอบคุณที่ร่วมส่งเสียงให้พรรคที่คุณเชียร์ครับ',
+                icon: 'success',
+                confirmButtonText: 'ตกลง'
+            }).then((result) => {
+                if (result.isConfirmed) navigate('/');
+            });
+        } catch (error) {
+            console.error("Error voting:", error);
+            Swal.fire({ title: 'เกิดข้อผิดพลาด', icon: 'error' });
         } finally {
             setIsSending(false);
-            localStorage.setItem('voted_debate',true)
-        };
+        }
     };
 
-
+    // ข้อมูล Static Cards สำหรับแสดงผลหน้าโหวต
     const cards = [
-        {
-            id:'p1',
-            name:'พรรคประชานารี',
-            color:'#FF00FF',
-            img:'https://i.postimg.cc/Bn3r6mLH/debate_p1.png'
-        },
-        {
-            id:'p2',
-            color:'#FF6400',
-            name:'Gorgeous radiant Nareerat',
-            img:'https://i.postimg.cc/FHvMRTdc/debate_p2.png'
-        },
-        {
-            id:'p3',
-            color:'#097969',
-            name:'NR NEXT GEN',
-            img:'https://i.postimg.cc/dVFb15kG/debate_p3.png'
-        }
+        { id: 'p1', name: 'พรรคประชานารี', color: '#FF00FF', img: 'https://i.postimg.cc/Bn3r6mLH/debate_p1.png' },
+        { id: 'p2', name: 'Gorgeous radiant Nareerat', color: '#FF6400', img: 'https://i.postimg.cc/FHvMRTdc/debate_p2.png' },
+        { id: 'p3', name: 'NR NEXT GEN', color: '#097969', img: 'https://i.postimg.cc/dVFb15kG/debate_p3.png' }
     ];
 
     if (loading) {
         return <div className="p-10 text-center">กำลังโหลดข้อมูล...</div>;
     }
 
-    if (isEndDebateDay) {
+    // แสดงผลลัพธ์เมื่อเลิกโหวตแล้ว (ถึง 08:30)
+    if (isDebateEnded) {
+        const totalVotes = parties?.reduce((sum, p) => sum + (p.voteCount || 0), 0) || 0;
+
         return (
-            <div className="w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
-                <div className="w-full max-w-4xl bg-white p-8 rounded-[2.5rem] border border-green-100 shadow-xl overflow-hidden">
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-black text-slate-800 mb-1">ผลการดีเบต</h2>
-                        <p className="text-slate-400 text-sm font-medium">โรงเรียนนารีรัตน์จังหวัดเเพร่</p>
+            <div className="animate-fade-up  w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
+                <div className="w-full max-w-2xl bg-white p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+                    
+                    {/* Header */}
+                    <div className="text-center mb-12">
+                        <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] mb-4 inline-block">
+                            Results
+                        </span>
+                        <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">ผลการปราศัย</h2>
+                        <p className="text-slate-400 font-medium">โรงเรียนนารีรัตน์จังหวัดเเพร่</p>
                     </div>
 
-                    <div className="flex items-end justify-center gap-6 md:gap-16 w-full h-100 px-4 pb-8">
-                    {parties !== null && parties.map((p, index) => {
-                        const totalVotes = parties.reduce((sum, p) => sum + (p.vote || 0), 0);
-                        const voteShare = totalVotes > 0 ? (p.vote / totalVotes) * 100 : 0;
-                        const safeHeight = Math.max(voteShare, 25);
-
-                        return (
-                            <div
-                                key={p.id}
-                                className="group flex flex-col items-center justify-end w-1/3 max-w-37 h-full cursor-pointer transition-transform duration-300 hover:scale-105 animate-in fade-in slide-in-from-bottom-10"
-                                style={{ animationDelay: `${index * 200}ms`, animationFillMode: 'both' }}
-                            >
-                                <div className="relative w-full flex justify-center items-end h-full">
+                    {/* Progress Bar เส้นเดียวแบ่งสัดส่วน */}
+                    <div className="relative mb-16 px-2">
+                        <style>{`
+                            @keyframes shimmer {
+                                0% { background-position: -1000px 0; }
+                                100% { background-position: 1000px 0; }
+                            }
+                            .progress-item {
+                                animation: shimmer 3s ;
+                                background-size: 1000px 100%;
+                            }
+                        `}</style>
+                        <div className="w-full h-10 rounded-2xl flex shadow-inner p-1 gap-1">
+                            {parties?.map((p) => {
+                                const voteShare = totalVotes > 0 ? (p.voteCount / totalVotes) * 100 : 0;
+                                if (voteShare === 0) return null;
+                                return (
                                     <div
-                                        className="relative w-full md:w-32 rounded-t-2xl md:rounded-t-[2.5rem] z-0 flex flex-col items-center pt-6 shadow-lg border-t border-x border-white/30 transition-all duration-1000 ease-out group-hover:brightness-110"
-                                        style={{
-                                            height: `${safeHeight}%`,
-                                            background: `linear-gradient(to top, ${p.color}40, ${p.color})`,
-                                        }}  
+                                        key={p.id}
+                                        style={{ 
+                                            width: `${voteShare}%`, 
+                                            backgroundColor: p.color || '#cbd5e1',
+                                            backgroundImage: `linear-gradient(90deg, ${p.color || '#cbd5e1'}, rgba(255,255,255,0.3), ${p.color || '#cbd5e1'})`
+                                        }}
+                                        className="progress-item rounded-md h-full first:rounded-l-xl last:rounded-r-xl transition-all duration-1000 ease-out hover:brightness-110 cursor-help relative group"
                                     >
-                                        <span className="text-white font-bold text-sm md:text-lg drop-shadow-md">
-                                            {voteShare.toFixed(1)}%
-                                        </span>
+                                        {voteShare > 10 && (
+                                            <div className="flex items-center justify-left pl-2 h-full">
+                                                <span className="text-white font-black text-xs md:text-sm drop-shadow-sm">
+                                                    <AnimatedCounter finalValue={voteShare} duration={1500} />%
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
+                                );
+                            })}
+                        </div>
+                        
+                        {/* แสดงยอดรวมตรงกลางเส้น (ถ้าต้องการ) */}
+                        <div className="absolute -bottom-5 w-full flex justify-between px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
 
-                                    <div className="absolute -bottom-4 z-20 transition-transform duration-500 transform group-hover:-translate-y-2">
-                                        <div
-                                            className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-white border-4 border-white shadow-xl flex items-center justify-center overflow-hidden"
-                                            style={{ outline: `2px solid ${p.color}20` }}
-                                        >
-                                            <span className="font-black text-2xl md:text-4xl" style={{ color: p.color }}>
-                                                <img src={p.logo} alt={p.name} />
-                                            </span>
+                    {/* รายละเอียดแต่ละพรรคด้านล่าง */}
+                    <div className="grid gap-4">
+                        {parties?.map((p) => {
+                            const voteShare = totalVotes > 0 ? (p.voteCount / totalVotes) * 100 : 0;
+                            return (
+                                <div key={p.id} onClick={() => navigate(`/profile/${p.UID}`)} className="hover:cursor-pointer flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                                    {/* Logo พรรค */}
+                                    <div className="relative">
+                                        <div className="w-14 h-14 rounded-full border-2 p-0.5" style={{ borderColor: `${p.color}40` }}>
+                                            <img src={p.logo} alt={p.name} className="w-full h-full rounded-full object-cover bg-white" />
+                                        </div>
+                                        <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg" style={{ backgroundColor: p.color }}>
+                                            {p.UID ? p.UID[1] : '?'}
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="z-30 mt-10 text-center">
-                                    <div
-                                        className="inline-block text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full shadow-sm"
-                                        style={{ backgroundColor: p.color }}
-                                    >
-                                        เบอร์ {p.UID[1]} • {voteShare.toFixed(1)}%
+                                    {/* เปอร์เซ็นต์ */}
+                                    <div className="text-right">
+                                        <span className="text-2xl font-black tracking-tighter" style={{ color: p.color }}>
+                                            <AnimatedCounter finalValue={voteShare} duration={1500} />%
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
                     </div>
                 </div>
             </div>
-        )
-    };
+        );}
 
     if (!isDebateDay) {
         return (
@@ -239,21 +282,21 @@ export default function Debate() {
 
                 <div className="space-y-1">
                     <h2 className="text-3xl font-black text-blue-950 tracking-tight">เร็ว ๆ นี้!</h2>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Debate is coming</p>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Coming Soon!!</p>
                 </div>
 
                 <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-white shadow-lg">
                     <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
                         <Timer className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-wider">นับถอยหลังสู่การดีเบต</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider">นับถอยหลัง</span>
                     </div>
                     <div className="text-lg font-black text-blue-900 tabular-nums pb-2">
                         {timeLeft || "กำลังคำนวณ..."}
                     </div>
                     
-                    <div className="justify-center items-center rounded-2xl">
+                    {/* <div className="justify-center items-center rounded-2xl">
                         <img src="https://i.postimg.cc/grF8B0Rb/S8298541.jpg" alt="Debate" className="w-90 items-center overflow-hidden rounded-2xl"/>
-                    </div>
+                    </div> */}
 
                     <p className="mt-3 text-slate-500 text-xs leading-relaxed px-2">
                         *ท่านจะสามารถเข้าถึงหน้านี้ได้เพื่อโหวตเมื่อถึงเวลาที่กำหนดเท่านั้น
@@ -305,8 +348,16 @@ export default function Debate() {
                 <div className='transition-all' style={{backgroundColor: choseDebateParty && `${choseDebateParty.color}20`}}>
                     <div className='animate-fade-up pb-20 min-h-screen relative max-w-xl mx-auto px-6 pt-8 '>
                         <div className="text-center mb-5">
-                            <img src="https://i.postimg.cc/VNffWcJD/Debate.png" className="w-full h-full"/>
+                            <h1 className="text-9xl font-poll font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-b from-blue-800 to-cyan-500 drop-shadow-2xl">
+                                POLL
+                            </h1>
+                            
                             <p className="text-slate-500 text-sm md:text-base">คลิกที่รูปภาพเพื่อเลือกพรรคที่คุณประทับใจ</p>
+                            <div className="mt-3 inline-flex items-center px-4 py-1.5 bg-red-50 border-2 border-red-500 rounded-2xl shadow-sm animate-pulse">
+                                <div className="text-lg font-black text-red-600 tabular-nums">
+                                    เหลือเวลา {timeLeft || "กำลังคำนวณ..."}
+                                </div>
+                            </div>
                         </div>
                         {cards.map((p) => {
                             return (

@@ -44,7 +44,7 @@ export default function Home({ sortBy }) {
     setIsLiking(true);
     try {
       await likedPost(post, user, likedPosts, (path) => navigate(path));
-      setTimeout(() => setIsLiking(false), 10000);
+      setTimeout(() => setIsLiking(false), 100);
     } catch (error) {
       console.error("Error liking post: ", error);
       setIsLiking(false);
