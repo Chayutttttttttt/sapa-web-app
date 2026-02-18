@@ -48,7 +48,7 @@ export default function Debate() {
     const [parties, setParties] = useState([]);
 
     const DebateDate = new Date('2026-02-18T08:00:00+07:00');
-    const DebateEndDate = new Date('2026-02-18T08:17:00+07:00');
+    const DebateEndDate = new Date('2026-02-18T08:37:00+07:00');
     
     const [description, setDescription] = useState("");
     const [sec, setSec] = useState("");
