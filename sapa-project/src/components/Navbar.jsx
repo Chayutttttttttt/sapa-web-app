@@ -61,7 +61,7 @@ export default function NavigationBar() {
         }`}></div>
       </button>
 
-      {*/<button
+      {/* <button
         onClick={() => navigate('/debate')}
         className={`nav-item flex flex-col items-center gap-1 transition-colors ${
           isActive('/debate') ? 'text-blue-600' : 'text-slate-400'
@@ -74,7 +74,7 @@ export default function NavigationBar() {
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
           isActive('/debate') ? 'bg-blue-600 opacity-100' : 'opacity-0'
         }`}></div>
-      </button>/*}
+      </button> */}
     </nav>
   );
 }
