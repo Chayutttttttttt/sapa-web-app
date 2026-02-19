@@ -2,47 +2,71 @@ import { Lock, Timer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "./Context";
 import { useNavigate } from "react-router-dom";
+import { PARTIES } from "../data/parties";
 import '../app.css';
 
+function AnimatedCounter({ finalValue, duration = 1000 }) {
+    const [displayValue, setDisplayValue] = useState(0);
+
+    useEffect(() => {
+        let startTime = Date.now();
+        let animationFrame;
+
+        const animate = () => {
+            const now = Date.now();
+            const progress = Math.min((now - startTime) / duration, 1);
+            const currentValue = progress * finalValue;
+            setDisplayValue(currentValue);
+
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+
+        return () => cancelAnimationFrame(animationFrame);
+    }, [finalValue, duration]);
+
+    return displayValue.toFixed(1)
+}
+
 export default function Vote() {
-    const { user, loading } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [isElectionDay, setIsElectionDay] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
-    const students = 2945;
-
-    const [parties, setParties] = useState([
-        {
-            id: "p1",
-            name: "test_party_name_1",
-            shortName: "PARTY 1",
-            color: "#ec4899",
-            votes: 1200,
-        },
-        {
-            id: "p2",
-            name: "test_party_name_2",
-            shortName: "PARTY 2",
-            color: "#f97316",
-            votes: 500,
-        },
-        {
-            id: "p3",
-            name: "test_party_name_3",
-            shortName: "PARTY 3",
-            color: "#10b981",
-            votes: 1100,
-        },
-    ]);
-
-    const [maxVotes, setMaxVotes] = useState(0);
+    const [parties, setParties] = useState([]);
+    const [loading,setLoading] = useState(false);
+    const allStudents = 2495;
 
     useEffect(() => {
-        const currentMax = Math.max(...parties.map((p) => p.votes || 0), 1);
-        setMaxVotes(currentMax);
-    }, [parties]);
+        const URL = import.meta.env.VITE_API_URL;
+        const fetchVotes = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(URL);
+                
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
 
-    const electionDate = new Date('2026-02-20T16:30:10+07:00');
+                const result = await response.json();
+                if (result && result.summary && result.summary.candidates) {
+                    setParties(result.summary);
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            };
+        };
+        fetchVotes();
+        const interval = setInterval(fetchVotes,300000);
+        return () => clearInterval(interval);
+        }, []);
+
+    const electionDate = new Date('2026-02-20T18:00:00+07:00');
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -66,73 +90,194 @@ export default function Vote() {
     }, []);
 
     
-    if (loading) return null;
+    if (loading) return <div className="max-w-xl mx-auto px-6 pt-32 text-center text-slate-400 font-bold animate-pulse"> กำลังโหลดเนื้อหา...</div>;
+    
+    const candidates = parties?.candidates || [];
+    const noVoteCount = parties?.noVote || 0;
+
+    const mappedParties = candidates.map(apiItem => {
+        // ค้นหาข้อมูลที่ id ตรงกันในไฟล์ data/parties.js
+        const staticData = PARTIES.find(p => String(p.id) === String(apiItem.tag));
+
+        return {
+            ...apiItem,
+            name: staticData.name || "Unknown",
+            party: staticData.shortName || "No Party",
+            color: staticData.icon  || '#cbd5e1',
+            image: staticData.img,
+        };
+    });
+
+        mappedParties.push({
+        candidateID: "NO_VOTE",
+        tag: "N/A",
+        votes: noVoteCount, // ใช้ค่า noVote จาก API
+        name: "ไม่ประสงค์ลงคะแนน",
+        party: "",
+        color: "#94a3b8", // สีเทาสำหรับ No Vote
+        img: "" // ใส่ไอคอนเฉพาะ (ถ้ามี)
+    });
+
+    // คำนวณยอดรวม: คะแนนผู้สมัครทุกคนรวมกัน + คะแนน No Vote
+    const totalVotes = candidates.reduce((sum, p) => sum + (p.votes || 0), 0) + noVoteCount;
+    
+    const turnoutPercentage = allStudents > 0 ? (totalVotes / allStudents) * 100 : 0;
 
     return (
-        <div>
+        <div className="pt-40 pb-40 bg-slate-50">
         {isElectionDay ? (
-            <div className="w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
-                <div className="w-full max-w-4xl bg-white p-8 rounded-[2.5rem] border border-green-100 shadow-xl overflow-hidden">
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-black text-slate-800 mb-1">ผลการเลือกตั้งสภานักเรียน อย่างไม่เป็นทางการ</h2>
-                        <p className="text-slate-400 text-sm font-medium">โรงเรียนนารีรัตน์จังหวัดเเพร่</p>
+            <div className=" animate-fade-up  w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
+                <div className="w-full max-w-2xl bg-white p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+                    
+                    {/* Header */}
+                    <div className="text-center mb-12">
+                        <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] mb-4 inline-block">
+                            ผลการนับคะเเนนอย่างไม่เป็นทางการ
+                        </span>
+                        <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">ผลการนับคะเเนน</h2>
+                        <p className="text-slate-400 font-medium">การเลือกตั้งคณะกรรมการสภานักเรียนโรงเรียนนารีรัตน์จังหวัดเเพร่</p>
                     </div>
 
-                    <div className="flex items-end justify-center gap-6 md:gap-16 w-full h-100 px-4 pb-8">
-                    {parties.map((p, index) => {
-                        const heightPercent = ((p.votes || 0) / maxVotes) * 80;
-                        const safeHeight = Math.max(heightPercent, 25);
+                    {/* Progress Bar เส้นเดียวแบ่งสัดส่วน */}
+                    <div className="relative mb-16 px-2">
+                        <style>
+                        {`
+                            @keyframes shimmer {
+                                0% { background-position: -1000px 0; }
+                                100% { background-position: 1000px 0; }
+                            }
+                            .progress-item {
+                                animation: shimmer 3s ;
+                                background-size: 1000px 100%;
+                            }
+                        `}
+                        </style>
+                        <div className="w-full h-10 rounded-2xl flex shadow-inner p-1 gap-1">
+                            {mappedParties?.sort((a,b) => b.votes - a.votes).map((p) => {
+                                const voteShare = totalVotes > 0 ? (p.votes / totalVotes) * 100 : 0;
+                                if (voteShare === 0) return null;
+                                return (
+                                    <div
+                                        key={p.tag}
+                                        style={{ 
+                                            width: `${voteShare}%`, 
+                                            backgroundColor: p.color || '#cbd5e1',
+                                            backgroundImage: `linear-gradient(90deg, ${p.color || '#cbd5e1'}, rgba(255,255,255,0.3), ${p.color || '#cbd5e1'})`
+                                        }}
+                                        className="progress-item rounded-md h-full first:rounded-l-xl last:rounded-r-xl transition-all duration-1000 ease-out hover:brightness-110 cursor-help relative group"
+                                    >
+                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-50">
+                                            {p.name}: {p.votes} คะแนน ({voteShare.toFixed(1)}%)
+                                        </div>
+                                        {voteShare > 15 && (
+                                            <div className="flex items-center justify-left pl-2 h-full">
+                                                <span className="text-white font-black text-xs md:text-sm drop-shadow-sm">
+                                                    <AnimatedCounter finalValue={voteShare} duration={1500} /> %
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        
+                        <div className="absolute -bottom-5 w-full flex justify-between px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                        
+                        
+                    </div>
 
-                        return (
-                        <div
-                            key={p.id}
-                            className="group flex flex-col items-center justify-end w-1/3 max-w-37 h-full cursor-pointer transition-transform duration-300 hover:scale-105 animate-in fade-in slide-in-from-bottom-10"
-                            style={{ animationDelay: `${index * 200}ms`, animationFillMode: 'both' }}
-                        >
-                            <div className="relative w-full flex justify-center items-end h-full">
-                                <div
-                                    className="relative w-full md:w-32 rounded-t-2xl md:rounded-t-[2.5rem] z-0 flex flex-col items-center pt-6 shadow-lg border-t border-x border-white/30 transition-all duration-1000 ease-out group-hover:brightness-110"
-                                    style={{
-                                    height: `${safeHeight}%`,
-                                    background: `linear-gradient(to top, ${p.color}40, ${p.color})`,
-                                    }}
-                                >
-                                    <span className="text-xl md:text-4xl font-black text-white drop-shadow-md mt-2 transition-all duration-1000">
-                                    {p.votes.toLocaleString()}
-                                    </span>
+                    <div className="text-left mb-2 pl-2">
+                        <h2 className="text-4xl font-black text-slate-800 tracking-tight">นับเเล้ว (อย่างไม่เป็นทางการ)</h2>
+                    </div>
+                    <div className="pl-2 flex justify-between items-end mb-2 px-1">
+                        <div className="text-left">
+                            <p>นับเเล้ว <span className="text-xl font-semibold">{totalVotes.toLocaleString()}</span></p>
+                        </div>
+                        <div className="text-left">
+                            <p><span className="text-xl font-bold"><AnimatedCounter finalValue={turnoutPercentage} duration={1500} /></span> % </p>
+                        </div>
+                    </div>
+                    <div className="relative mb-16 px-2">
+                        <style>
+                        {`
+                            @keyframes shimmer {
+                                0% { background-position: -1000px 0; }
+                                100% { background-position: 1000px 0; }
+                            }
+                            .progress-item {
+                                animation: shimmer 3s  linear;
+                                background-size: 1000px 100%;
+                            }
+                        `}
+                        </style>
+                        
+                        {/* Background Bar (คนที่ยังไม่ได้โหวตทั้งหมด) */}
+                        <div className="w-full h-10 bg-slate-100 rounded-2xl flex shadow-inner p-1 gap-1 border border-slate-200">
+                            <div
+                                style={{ 
+                                    // ใช้ turnoutPercentage เพื่อแสดงว่ามาโหวตแล้วกี่ % จากนักเรียนทั้งหมด
+                                    width: `${turnoutPercentage}%`, 
+                                    backgroundColor: '#2563eb', // เปลี่ยนเป็นสีน้ำเงินให้ดูเด่น
+                                    backgroundImage: `linear-gradient(90deg, #2563eb, rgba(255,255,255,0.3), #2563eb)`
+                                }}
+                                className="progress-item rounded-xl h-full transition-all duration-1000 ease-out hover:brightness-110 cursor-help relative group shadow-md"
+                            >
+                                {/* Tooltip แสดงจำนวนคนโหวตจริง */}
+                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-50">
+                                    นับเเล้ว {totalVotes.toLocaleString()} 
                                 </div>
 
-                                <div className="absolute -bottom-4 z-20 transition-transform duration-500 transform group-hover:-translate-y-2">
-                                    <div
-                                    className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-white border-4 border-white shadow-xl flex items-center justify-center overflow-hidden"
-                                    style={{ outline: `2px solid ${p.color}20` }}
-                                    >
-                                    <span className="font-black text-2xl md:text-4xl" style={{ color: p.color }}>
-                                        {p.shortName[0]}
-                                    </span>
+                                {/* แสดง % ตรงกลางแท่งถ้าพื้นที่กว้างพอ */}
+                                {turnoutPercentage > 10 && (
+                                    <div className="flex items-center justify-center h-full">
+                                        <span className="text-white font-black text-xs drop-shadow-sm">
+                                            <AnimatedCounter finalValue={turnoutPercentage} duration={1500} /> %
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* พื้นที่สีเทาที่เหลือในแท่ง จะแสดงสัดส่วนคนที่ยังไม่มาโหวตโดยอัตโนมัติ */}
+                        </div>
+                        
+                        {/* สเกลเปอร์เซ็นต์ด้านล่าง */}
+                        <div className="absolute -bottom-5 w-full flex justify-between px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-4">
+                        {mappedParties?.map((p) => {
+                            return (
+                                <div key={p.tag} className=" flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                                    {p.candidateID !== "NO_VOTE" && (
+                                        <div className="relative">
+                                            <div className="w-14 h-14 rounded-full border-2 p-0.5" style={{ borderColor: `${p.color}40` }}>
+                                                <img src={p.image} alt={p.name} className="w-full h-full rounded-full object-cover bg-white" />
+                                            </div>
+                                            <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg" style={{ backgroundColor: p.color }}>
+                                                {p.tag ? p.tag[1] : '?'}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="text-left grid">
+                                        <span className="text-2xl font-black tracking-tighter" style={{ color: p.color }}>
+                                            {p.name}
+                                        </span>
+                                        <span className="text-2xl font-black tracking-tighter" style={{ color: p.color }}>
+                                            <p> <span className="font-bold"> {p.votes} </span> <span className="pl-1"> คะเเนน </span> </p>
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="z-30 mt-10 text-center">
-                                <h3 className="font-black text-slate-800 text-base md:text-xl leading-none mb-1">
-                                    {p.shortName}
-                                </h3>
-                                <div
-                                    className="inline-block text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full shadow-sm"
-                                    style={{ backgroundColor: p.color }}
-                                >
-                                    เบอร์ {p.id.replace("p", "")}
-                                </div>
-                            </div>
-                        </div>
-                        );
-                    })}
+                            );
+                        })}
                     </div>
-                </div>
-                <div>
-
-
                 </div>
             </div>
         ) : (
@@ -161,15 +306,6 @@ export default function Vote() {
                         ท่านจะสามารถเข้าถึงหน้านี้ได้เพื่อดูคะแนนเมื่อถึงเวลาที่กำหนดเท่านั้น
                     </p>
                 </div>
-
-                {!user && (
-                    <button 
-                        onClick={() => navigate('/login')}
-                        className="mt-2 text-blue-600 font-black text-[10px] uppercase tracking-widest hover:underline cursor-pointer transition-all"
-                    >
-                        เข้าสู่ระบบเพื่อเตรียมพร้อม &rarr;
-                    </button>
-                )}
             </div>
         )}
     </div>

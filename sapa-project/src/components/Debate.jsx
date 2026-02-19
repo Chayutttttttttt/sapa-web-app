@@ -268,7 +268,8 @@ export default function Debate() {
                     </div>
                 </div>
             </div>
-        );}
+        );
+    }
 
     if (!isDebateDay) {
         return (
