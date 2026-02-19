@@ -124,9 +124,9 @@ export default function Vote() {
     const turnoutPercentage = allStudents > 0 ? (totalVotes / allStudents) * 100 : 0;
 
     return (
-        <div className="pt-40 pb-40 bg-slate-50">
+        <div className=" bg-slate-50">
         {isElectionDay ? (
-            <div className=" animate-fade-up  w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
+            <div className=" pt-40 pb-40 animate-fade-up  w-full h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
                 <div className="w-full max-w-2xl bg-white p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
                     
                     {/* Header */}
