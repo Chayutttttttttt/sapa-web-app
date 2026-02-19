@@ -84,14 +84,13 @@ export default function PartyDatail({PARTIES}) {
       };
     
     
-    if (loading && !party) {
+    if (loading || !party || !post) {
         return <div className="p-10 text-center">กำลังโหลดข้อมูล...</div>;
     }
 
     if (!currentParty) {
         return <div className="p-10 text-center">ไม่พบข้อมูลพรรคที่ตรงกับ UID นี้</div>;
     }
-    
     
     return (
         <div className="break-all max-w-xl mx-auto px-6 pt-8 pb-24 space-y-4">
@@ -106,7 +105,7 @@ export default function PartyDatail({PARTIES}) {
                 <p className="text-slate-400 text-sm ">{formatDate(post.date?.toDate ? post.date.toDate() : post.date)}</p>
                 <div className="pt-2 flex items-center">
                     <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-900 relative overflow-hidden">
-                    <img src={`/${currentParty.img}`} alt="" className="w-full h-full object-cover"/>
+                    <img src={`${currentParty.img}`} alt="" className="w-full h-full object-cover"/>
                     </div>
                     <span className="font-medium ml-3 text-[15px]">{party?.name || "ไม่ทราบชื่อพรรค"}</span>
                 </div>
