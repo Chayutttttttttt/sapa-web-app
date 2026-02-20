@@ -66,7 +66,7 @@ export default function Vote() {
         return () => clearInterval(interval);
         }, []);
 
-    const electionDate = new Date('2026-02-20T18:00:00+07:00');
+    const electionDate = new Date('2026-02-20T16:05:00+07:00');
 
     useEffect(() => {
         const timer = setInterval(() => {
