@@ -38,7 +38,7 @@ export default function Vote() {
     const [timeLeft, setTimeLeft] = useState("");
     const [parties, setParties] = useState([]);
     const [loading,setLoading] = useState(false);
-    const allStudents = 2495;
+    const allStudents = 2945;
 
     useEffect(() => {
         const URL = import.meta.env.VITE_API_URL;
