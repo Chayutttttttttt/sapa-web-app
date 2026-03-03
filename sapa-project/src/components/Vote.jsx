@@ -66,7 +66,7 @@ export default function Vote() {
         return () => clearInterval(interval);
         }, []);
 
-    const electionDate = new Date('2026-02-20T16:20:00+07:00');
+    const electionDate = new Date('2027-02-20T16:20:00+07:00');
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -215,23 +215,21 @@ export default function Vote() {
                         `}
                         </style>
                         
-                        {/* Background Bar (คนที่ยังไม่ได้โหวตทั้งหมด) */}
                         <div className="w-full h-10 bg-slate-100 rounded-2xl flex shadow-inner p-1 gap-1 border border-slate-200">
                             <div
                                 style={{ 
-                                    // ใช้ turnoutPercentage เพื่อแสดงว่ามาโหวตแล้วกี่ % จากนักเรียนทั้งหมด
+                                    
                                     width: `${turnoutPercentage}%`, 
-                                    backgroundColor: '#2563eb', // เปลี่ยนเป็นสีน้ำเงินให้ดูเด่น
+                                    backgroundColor: '#2563eb',
                                     backgroundImage: `linear-gradient(90deg, #2563eb, rgba(255,255,255,0.3), #2563eb)`
                                 }}
                                 className="progress-item rounded-xl h-full transition-all duration-1000 ease-out hover:brightness-110 cursor-help relative group shadow-md"
                             >
-                                {/* Tooltip แสดงจำนวนคนโหวตจริง */}
+                               
                                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-50">
                                     นับเเล้ว {totalVotes.toLocaleString()} 
                                 </div>
 
-                                {/* แสดง % ตรงกลางแท่งถ้าพื้นที่กว้างพอ */}
                                 {turnoutPercentage > 10 && (
                                     <div className="flex items-center justify-center h-full">
                                         <span className="text-white font-black text-xs drop-shadow-sm">
