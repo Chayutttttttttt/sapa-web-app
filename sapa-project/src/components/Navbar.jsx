@@ -50,15 +50,13 @@ export default function NavigationBar() {
 
       <button
         onClick={() => window.location.href = "https://my-mooc-app.web.app/"}
-        className={`nav-item flex flex-col items-center gap-1 transition-colors hover:text-blue-600 cursor-pointer`}
+        className={`text-slate-400 nav-item flex flex-col items-center gap-1 transition-colors hover:text-blue-600 cursor-pointer`}
       >
         <MonitorPlay className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
           NRDD MOOC
         </span>
-        <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
-            isActive('/learn') ? 'bg-blue-600 opacity-100' : 'opacity-0'
-          }`}>
+        <div className={`w-1 h-1 rounded-full mt-1 transition-opacity`}>
         </div>
       </button>
       
@@ -79,15 +77,13 @@ export default function NavigationBar() {
       
       <button
         onClick={() => window.location.href = "https://www.roblox.com/games/71496120037979/NRDD-map?gameSetTypeId=100000003&homePageSessionInfo=8669509c-4f10-4e23-becd-fa4c6e3186d1&isAd=false&numberOfLoadedTiles=186&page=homePage&placeId=71496120037979&playContext=homePage&position=0&positionInRow=0&rowOnPage=1&sortPos=1&sortSubId=&universeId=10133533159"}
-        className={`nav-item flex flex-col items-center gap-1 transition-color hover:text-blue-600 cursor-pointer`}
+        className={`text-slate-400 nav-item flex flex-col items-center gap-1 transition-color hover:text-blue-600 cursor-pointer`}
       >
         <Gamepad2 className="w-6 h-6" />
-        <span className="text-[10px] font-bold uppercase tracking-tighter">
+        <span className="text-[10px] font-bold uppercase tracking-tighter ">
           NRDD MAP
         </span>
-        <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
-            isActive('/learn') ? 'bg-blue-600 opacity-100' : 'opacity-0'
-          }`}>
+        <div className={`w-1 h-1 rounded-full mt-1 transition-opacity`}>
         </div>
       </button>
 
