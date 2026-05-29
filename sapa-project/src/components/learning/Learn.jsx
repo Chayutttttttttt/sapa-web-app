@@ -32,7 +32,7 @@ export default function Learn() {
         });
         return acc;
     }, []);
-    console.log(topics)
+
     return (
         <div className="animate-fade-up pb-28 min-h-screen max-w-xl mx-auto px-6 pt-8 space-y-4">
             <div className="flex items-center justify-between mb-8">
@@ -43,7 +43,7 @@ export default function Learn() {
             </div>
 
             <div className=" flex items-center justify-between">
-                <div onClick={() => navigate(`./video`)} className="text-center p-2 bg-white w-full h-12 border-blue-200 border-2 rounded-3xl appearance-auto transition-all hover:cursor-pointer hover:border-blue-500 hover:text-blue-800 text-gray-400 text-xl font-medium">
+                <div onClick={() => window.location.href = "https://my-mooc-app.web.app/"} className="text-center p-2 bg-white w-full h-12 border-blue-200 border-2 rounded-3xl appearance-auto transition-all hover:cursor-pointer hover:border-blue-500 hover:text-blue-800 text-gray-400 text-xl font-medium">
                     <h1>รับชมเเบบวิดีโอ </h1>
                 </div>
             </div>

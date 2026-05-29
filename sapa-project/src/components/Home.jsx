@@ -67,11 +67,10 @@ export default function Home({ sortBy }) {
                 <h2 className="text-3xl font-bold text-blue-950 tracking-tight">ประชาสัมพันธ์</h2>
                 <p className="text-slate-400 font-medium">วันที่ {formatDate(new Date())}</p>
             </div>
-        </div>
+        </div>}
 
-        /* <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
-          <h2>📣📣 ชาวฟ้าน้ำเงิน สามารถตรวจสอบรายชื่อผู้มีสิทธิ์เลือกตั้งคณะกรรมการสภานักเรียนโรงเรียนนารีรัตน์จังหวัดแพร่ ปีการศึกษา 2569
-ได้แล้วจ้า</h2>
+        {/* <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
+          <h2>📣📣 ชาวฟ้าน้ำเงิน สามารถตรวจสอบรายชื่อผู้มีสิทธิ์เลือกตั้งคณะกรรมการสภานักเรียนโรงเรียนนารีรัตน์จังหวัดแพร่ ปีการศึกษา 2569ได้แล้วจ้า</h2>
           <button 
             onClick={() => window.location.href = "https://script.google.com/macros/s/AKfycbw3YZzqvKy5do-i2RR6Yqeqy9Co4K9D2NpSPOeXyJrvcbCZ7RlVKS2W6XzMEUSe6PrY/exec"} 
             className="mt-3 mb-3 flex flex-row gap-1 group appearance-none bg-white border border-blue-100 text-blue-900 py-2 pl-4 pr-10 rounded-xl text-xs font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:cursor-pointer"
@@ -79,9 +78,21 @@ export default function Home({ sortBy }) {
             <MoveLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />  
             คลิกที่นี่!!!
           </button>
-          <h2>เพียงกรอกรหัสประจำตัวนักเรียน ก็สามารถตรวจสอบสิทธิ์ของตัวเองได้แล้วค่ะ 
-📍อย่าลืมมาใช้สิทธิ์ของตนเองในวันที่ 20 กุมภาพันธ์ 2569 นี้กันนะคะ 📥📥🗳️🗳️ 🩵💙</h2>
+          <h2>เพียงกรอกรหัสประจำตัวนักเรียน ก็สามารถตรวจสอบสิทธิ์ของตัวเองได้แล้วค่ะ 📍อย่าลืมมาใช้สิทธิ์ของตนเองในวันที่ 20 กุมภาพันธ์ 2569 นี้กันนะคะ 📥📥🗳️🗳️ 🩵💙</h2>
         </div> */}
+
+        <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
+          <h2 className="text-lg font-bold text-blue-950 mt-2">🎮 NRDD Map : Digital Democracy For Participation Project ประชาธิปไตยดิจิทัลเพื่อการมีส่วนร่วม 🎮</h2>
+          <h2> ประชาธิปไตยจริงๆแล้วอยู่ใกล้ตัวเรามากกว่าที่คิดหลายคนคิดว่าการเมืองเป็นเรื่องไกลตัว แต่จริงๆแล้วทุกการตัดสินใจของประเทศ ส่งผลกับชีวิตพวกเราทุกคนวันนี้ เราจะพาเธอไปเรียนรู้ “อำนาจอธิปไตย” ผ่านภารกิจต่างๆ พร้อมมั้ย !</h2>
+          <button 
+            onClick={() => window.location.href = "https://www.roblox.com/games/71496120037979/NRDD-map?gameSetTypeId=100000003&homePageSessionInfo=8669509c-4f10-4e23-becd-fa4c6e3186d1&isAd=false&numberOfLoadedTiles=186&page=homePage&placeId=71496120037979&playContext=homePage&position=0&positionInRow=0&rowOnPage=1&sortPos=1&sortSubId=&universeId=10133533159"} 
+            className="mt-3 mb-3 flex flex-row gap-1 group appearance-none bg-white border border-blue-100 text-blue-900 py-2 pl-4 pr-10 rounded-xl text-xs font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm hover:cursor-pointer"
+          >
+            <MoveLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />  
+            เล่นเลย!!!
+          </button>
+        </div>
+        
 
         {posts.map((post) => {
           const party = PARTIES.find((p) => p.id === post.partyID) || { name: "ไม่ระบุพรรค", img: "/sapa.png" }; 
