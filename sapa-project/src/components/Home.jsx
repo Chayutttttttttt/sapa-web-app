@@ -81,7 +81,7 @@ export default function Home({ sortBy }) {
           <h2>เพียงกรอกรหัสประจำตัวนักเรียน ก็สามารถตรวจสอบสิทธิ์ของตัวเองได้แล้วค่ะ 📍อย่าลืมมาใช้สิทธิ์ของตนเองในวันที่ 20 กุมภาพันธ์ 2569 นี้กันนะคะ 📥📥🗳️🗳️ 🩵💙</h2>
         </div> */}
 
-        <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
+        {/* <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
           <h2 className="text-lg font-bold text-blue-950 mt-2">🎮 NRDD Map : Digital Democracy For Participation Project ประชาธิปไตยดิจิทัลเพื่อการมีส่วนร่วม 🎮</h2>
           <h2> ประชาธิปไตยจริงๆแล้วอยู่ใกล้ตัวเรามากกว่าที่คิดหลายคนคิดว่าการเมืองเป็นเรื่องไกลตัว แต่จริงๆแล้วทุกการตัดสินใจของประเทศ ส่งผลกับชีวิตพวกเราทุกคนวันนี้ เราจะพาเธอไปเรียนรู้ “อำนาจอธิปไตย” ผ่านภารกิจต่างๆ พร้อมมั้ย !</h2>
           <button 
@@ -91,7 +91,7 @@ export default function Home({ sortBy }) {
             <MoveLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />  
             เล่นเลย!!!
           </button>
-        </div>
+        </div> */}
         
 
         {posts.map((post) => {
