@@ -54,7 +54,7 @@ export default function NavigationBar() {
           isActive('/learn') ? 'text-blue-600' : 'text-slate-400'
         } hover:text-blue-600 cursor-pointer`}
       >
-        <LibraryBig className="w-6 h-6" />
+        <MonitorPlay className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
           NRDDMOOC
         </span>
@@ -85,7 +85,7 @@ export default function NavigationBar() {
           isActive('/learn') ? 'text-blue-600' : 'text-slate-400'
         } hover:text-blue-600 cursor-pointer`}
       >
-        <LibraryBig className="w-6 h-6" />
+        <Gamepad2 className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
           NRDD MAP
         </span>
