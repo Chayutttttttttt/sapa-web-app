@@ -49,7 +49,7 @@ export default function Profile() {
     return (
       <div className="text-center py-20">
         <h2 className="text-xl font-bold text-slate-400">ไม่พบข้อมูลพรรค</h2>
-        <button onClick={() => navigate('/parties')} className="hover:cursor-pointer mt-4 text-blue-600 font-bold">กลับไปหน้ารวมพรรค</button>
+        <button onClick={() => navigate('/school')} className="hover:cursor-pointer mt-4 text-blue-600 font-bold">กลับไปหน้ารวมพรรค</button>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function Profile() {
   return (
     <div className='animate-fade-up pb-28 min-h-screen relative max-w-xl mx-auto px-6 pt-8 space-y-4'>
       <button 
-        onClick={() => navigate("/parties")} 
+        onClick={() => navigate("/school")} 
         className="flex items-center gap-2 group bg-white border border-blue-100 text-blue-900 py-2.5 px-5 rounded-2xl text-xs font-bold uppercase tracking-wider shadow-sm hover:bg-blue-50 transition-all cursor-pointer"
       >
         <MoveLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> กลับ

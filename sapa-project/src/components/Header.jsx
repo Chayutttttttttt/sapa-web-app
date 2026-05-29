@@ -22,7 +22,7 @@ export default function Header() {
                 </div>
                 <div>
                     <h1 className="text-[16px] font-extrabold leading-none tracking-tight text-blue-950 md:text-[20px] lg:text-xl">
-                        คณะกรรมการ<span className="text-blue-500">สภานักเรียน</span>
+                        โครงการประชาธิปไตยดิจิทัล<span className="text-blue-500">เพื่อการมีส่วนร่วม</span>
                     </h1>
                     <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-0.5">
                         โรงเรียนนารีรัตน์จังหวัดแพร่

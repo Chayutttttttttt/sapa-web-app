@@ -23,7 +23,7 @@ export default function Home({ sortBy }) {
     const q = query(
       postsRef, 
       orderBy("date","desc"), 
-      limit(20)
+      limit(1)
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -62,14 +62,14 @@ export default function Home({ sortBy }) {
     <div className="animate-fade-up pb-28 min-h-screen">
       <main className="max-w-xl mx-auto px-6 pt-8 space-y-4">
         
-        <div className="flex items-center justify-between mb-8">
+        {<div className="flex items-center justify-between mb-8">
             <div>
                 <h2 className="text-3xl font-bold text-blue-950 tracking-tight">ประชาสัมพันธ์</h2>
                 <p className="text-slate-400 font-medium">วันที่ {formatDate(new Date())}</p>
             </div>
         </div>
 
-        <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
+        /* <div className="animate-fade-up bg-white p-5 rounded-3xl shadow-sm border border-slate-50 transition-all hover:shadow-md"> 
           <h2>📣📣 ชาวฟ้าน้ำเงิน สามารถตรวจสอบรายชื่อผู้มีสิทธิ์เลือกตั้งคณะกรรมการสภานักเรียนโรงเรียนนารีรัตน์จังหวัดแพร่ ปีการศึกษา 2569
 ได้แล้วจ้า</h2>
           <button 
@@ -81,7 +81,7 @@ export default function Home({ sortBy }) {
           </button>
           <h2>เพียงกรอกรหัสประจำตัวนักเรียน ก็สามารถตรวจสอบสิทธิ์ของตัวเองได้แล้วค่ะ 
 📍อย่าลืมมาใช้สิทธิ์ของตนเองในวันที่ 20 กุมภาพันธ์ 2569 นี้กันนะคะ 📥📥🗳️🗳️ 🩵💙</h2>
-        </div>
+        </div> */}
 
         {posts.map((post) => {
           const party = PARTIES.find((p) => p.id === post.partyID) || { name: "ไม่ระบุพรรค", img: "/sapa.png" }; 
@@ -139,7 +139,7 @@ export default function Home({ sortBy }) {
             </div>
           );
         })}
-      </main>    
+      </main>
     </div>
   );
 }

@@ -12,7 +12,10 @@ const Parties = lazy(() => import("./components/Parties"));
 const Navbar = lazy(() => import("./components/Navbar"));
 const Header = lazy(() => import("./components/Header"));
 const Footer = lazy(() => import("./components/Footer.jsx"));
-const Debate = lazy(() => import("./components/Debate.jsx"))
+const Debate = lazy(() => import("./components/Debate.jsx"));
+const Learn = lazy(() => import("./components/learning/Learn.jsx"));
+const TopicDetail = lazy(() => import("./components/learning/Topic.jsx"));
+const School = lazy(() => import("./components/School.jsx"));
 
 const PartyHome = lazy(() => import("./components/party/PartyHome.jsx"));
 const PartyCreatePosts = lazy(() => import("./components/party/PartyCreatePosts.jsx"));
@@ -37,10 +40,8 @@ export default function App() {
         <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
           <Routes>
             <Route path="/" element={<Home navigateTo={(path) => navigate(path)} />} />
-            <Route path="/parties" element={<Parties parties={PARTIES} navigateTo={(path) => navigate(path)} />} />
             <Route path="/profile/:id" element={<Profile navigateTo={(path) => navigate(path)} />} />
             <Route path="/party/:partyId/post/:postId" element={<PostDetail navigateTo={(path) => navigate(path)} />} />
-            <Route path="/vote" element={<Vote />} />
             <Route path="/debate" element={<Debate/>}/>
             <Route path="/login" element={<Login navigateTo={(path) => navigate(path)} />} />
             <Route path="/partyLogin" element={<PartyLogin navigateTo={(path) => navigate(path)} />} />
@@ -48,6 +49,9 @@ export default function App() {
             <Route path="/partyAdmin/:id/create" element={<PartyCreatePosts PARTIES={PARTIES} navigateTo={(path) => navigate(path)} />} />
             <Route path="/partyAdmin/:id/posts" element={<PartyPosts PARTIES={PARTIES} navigateTo={(path) => navigate(path)} />} />
             <Route path="/partyAdmin/:id/posts/:postID" element={<PartyDetail PARTIES={PARTIES} navigateTo={(path) => navigate(path)}/>}></Route>
+            <Route path="/learn" element={<Learn navigateTo={(path) => navigate(path)} />} />
+            <Route path="/learn/:id" element={<TopicDetail navigateTo={(path) => navigate(path)} />} />
+            <Route path="/school" element={<School navigateTo={(path) => navigate(path)} />} />
           </Routes>
         </Suspense>
       </div>

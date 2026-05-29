@@ -1,4 +1,4 @@
-import { HomeIcon, Layers, Vote,ArchiveRestore } from 'lucide-react';
+import { HomeIcon, Layers, Vote,ArchiveRestore , LibraryBig,School} from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../app.css';
 
@@ -32,7 +32,22 @@ export default function NavigationBar() {
       </button>
 
       <button
-        onClick={() => navigate('/parties')}
+        onClick={() => navigate('/school')}
+        className={`nav-item flex flex-col items-center gap-1 transition-colors ${
+          isActive('/school') ? 'text-blue-600' : 'text-slate-400'
+        } hover:text-blue-600 cursor-pointer`}
+      >
+        <School className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">
+          โรงเรียน
+        </span>
+        <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
+          isActive('/school') ? 'bg-blue-600 opacity-100' : 'opacity-0'
+        }`}></div>
+      </button>
+
+      {/* <button
+        onClick={() => navigate('/school/parties')}
         className={`nav-item flex flex-col items-center gap-1 transition-colors ${
           isActive('/parties') || isActive('/profile') ? 'text-blue-600' : 'text-slate-400'
         } hover:text-blue-600 cursor-pointer`}
@@ -42,14 +57,14 @@ export default function NavigationBar() {
           พรรค
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
-          isActive('/parties') || isActive('/profile') ? 'bg-blue-600 opacity-100' : 'opacity-0'
+          isActive('/school/parties') || isActive('/profile') ? 'bg-blue-600 opacity-100' : 'opacity-0'
         }`}></div>
-      </button>
+      </button> */}
 
-      <button
-        onClick={() => navigate('/vote')}
+      {/* <button
+        onClick={() => navigate('/school/vote')}
         className={`nav-item flex flex-col items-center gap-1 transition-colors ${
-          isActive('/vote') ? 'text-blue-600' : 'text-slate-400'
+          isActive('/school/vote') ? 'text-blue-600' : 'text-slate-400'
         } hover:text-blue-600 cursor-pointer`}
       >
         <Vote className="w-6 h-6" />
@@ -57,9 +72,9 @@ export default function NavigationBar() {
           ผลการเลือกตั้ง
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
-          isActive('/vote') ? 'bg-blue-600 opacity-100' : 'opacity-0'
+          isActive('/school/vote') ? 'bg-blue-600 opacity-100' : 'opacity-0'
         }`}></div>
-      </button>
+      </button> */}
 
       {/* <button
         onClick={() => navigate('/debate')}
@@ -75,6 +90,21 @@ export default function NavigationBar() {
           isActive('/debate') ? 'bg-blue-600 opacity-100' : 'opacity-0'
         }`}></div>
       </button> */}
+
+      <button
+        onClick={() => navigate('/learn')}
+        className={`nav-item flex flex-col items-center gap-1 transition-colors ${
+          isActive('/learn') ? 'text-blue-600' : 'text-slate-400'
+        } hover:text-blue-600 cursor-pointer`}
+      >
+        <LibraryBig className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">
+          ห้องเรียนรู้
+        </span>
+        <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
+          isActive('/learn') ? 'bg-blue-600 opacity-100' : 'opacity-0'
+        }`}></div>
+      </button>
     </nav>
   );
 }
