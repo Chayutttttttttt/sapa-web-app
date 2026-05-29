@@ -54,7 +54,7 @@ export default function NavigationBar() {
       >
         <MonitorPlay className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
-          NRDDMOOC
+          NRDD MOOC
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
             isActive('/learn') ? 'bg-blue-600 opacity-100' : 'opacity-0'
