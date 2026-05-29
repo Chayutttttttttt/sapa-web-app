@@ -37,9 +37,9 @@ export default function NavigationBar() {
           isActive('/school') ? 'text-blue-600' : 'text-slate-400'
         } hover:text-blue-600 cursor-pointer`}
       >
-        <School className="w-6 h-6" />
+        <Vote className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
-          โรงเรียน
+          NR eVote
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
           isActive('/school') ? 'bg-blue-600 opacity-100' : 'opacity-0'
