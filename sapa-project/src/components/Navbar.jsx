@@ -54,7 +54,7 @@ export default function NavigationBar() {
       >
         <MonitorPlay className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
-          NRDD MOOC
+          NRDD  MOOC
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity`}>
         </div>
@@ -68,7 +68,7 @@ export default function NavigationBar() {
       >
         <Vote className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">
-          NR eVote
+          NR  eVote
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity ${
           isActive('/school') ? 'bg-blue-600 opacity-100' : 'opacity-0'
@@ -81,7 +81,7 @@ export default function NavigationBar() {
       >
         <Gamepad2 className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter ">
-          NRDD MAP
+          NRDD  MAP
         </span>
         <div className={`w-1 h-1 rounded-full mt-1 transition-opacity`}>
         </div>
