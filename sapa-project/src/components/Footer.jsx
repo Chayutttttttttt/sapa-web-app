@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="content-center text-center ">  
             <footer className="bg-white-800 border-t border-blue-100 text-white py-12 px-6 flex flex-col items-center">
                 <h2 className="md:text-m text-[14px] font-semibold text-blue-950 mb-2">
-                    คณะกรรมการสภานักเรียนโรงเรียนนารีรัตน์จังหวัดเเพร่
+                    พัฒนาระบบโดย คณะทำงานโครงการประชาธิปไตยดิจิทัลเพื่อการมีส่วนร่วม โรงเรียนนารีรัตน์จังหวัดแพร่
                 </h2>
                 <h4 className="text-s text-slate-400"> ติดต่อเรา </h4>
                 <div className="flex flex-row gap-6 mt-4 mb-4">
@@ -14,7 +14,7 @@ export default function Footer() {
                 </div>
                 <hr className="w-50 md:w-100 h-0.5 text-slate-400 mb-6"/>
                 <p className="text-[10px] font-light text-slate-400 tracking-widest uppercase">
-                    © 2026 คณะกรรมการสภานักเรียนโรงเรียนนารีรัตน์จังหวัดเเพร่. All rights reserved.
+                    © 2026 คณะทำงานโครงการประชาธิปไตยดิจิทัลเพื่อการมีส่วนร่วม โรงเรียนนารีรัตน์จังหวัดแพร่. All rights reserved.
                 </p>
             </footer>
         </div>
