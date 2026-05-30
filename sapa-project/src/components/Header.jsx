@@ -15,7 +15,7 @@ export default function Header() {
             >
                 <div className="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center shadow-xl shadow-blue-200 transition-transform group-active:scale-90">
                     <img
-                        src="https://i.postimg.cc/qRDgw6yg/sapa.png"
+                        src="https://i.postimg.cc/yYLWyfyK/Logo.png"
                         className="text-white w-10 h-10 object-contain"
                         alt="NR Logo"
                     />
