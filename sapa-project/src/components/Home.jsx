@@ -23,7 +23,7 @@ export default function Home({ sortBy }) {
     const q = query(
       postsRef, 
       orderBy("date","desc"), 
-      limit(1)
+      limit(5)
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
